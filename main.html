@@ -4,14 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Чат-бот</title>
-    <link rel="stylesheet" href="/main.css">
+    <link rel="stylesheet" href="main.css">
 </head>
 <body>
     <div class="chat-container">
+        <h1 class="chat-title">Чат-бот</h1>
         <div class="chat-messages" id="chat-messages">
+            <!-- Предзаполненные сообщения как на скриншоте -->
+            <div class="message-container bot">
+                <div class="avatar bot-avatar"></div>
+                <div class="message bot-message">Привет, меня зовут Чат-бот, а как зовут тебя?</div>
+            </div>
+            <div class="message-container user">
+                <div class="message user-message">/start</div>
+                <div class="avatar user-avatar"></div>
+            </div>
+            <div class="message-container bot">
+                <div class="avatar bot-avatar"></div>
+                <div class="message bot-message">Введите команду /start, для начала общения</div>
+            </div>
+            <div class="message-container user">
+                <div class="message user-message">/name: Вася</div>
+                <div class="avatar user-avatar"></div>
+            </div>
+            <div class="message-container bot">
+                <div class="avatar bot-avatar"></div>
+                <div class="message bot-message">Привет Вася, приятно познакомиться. Я умею считать, введи числа которые надо посчитать</div>
+            </div>
+            <div class="message-container user">
+                <div class="message user-message">2 и 3</div>
+                <div class="avatar user-avatar"></div>
+            </div>
+            <div class="message-container bot">
+                <div class="avatar bot-avatar"></div>
+                <div class="message bot-message">Я не понимаю, введите другую команду!</div>
+            </div>
+            <div class="message-container user">
+                <div class="message user-message">Привет, меня зовут Чат-бот, а как зовут тебя?</div>
+                <div class="avatar user-avatar"></div>
+            </div>
         </div>
         <div class="input-container">
-            <textarea id="message-input" placeholder="Введите сообщение..." rows="1"></textarea>
+            <input type="text" id="message-input" placeholder="Ок" />
             <button id="send-button" disabled>
                 <svg class="plane-icon" viewBox="0 0 24 24">
                     <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -19,9 +53,6 @@
             </button>
         </div>
     </div>
-
-
-    <script src="./main.js">
-    </script>
+    <script src="main.js"></script>
 </body>
 </html>
