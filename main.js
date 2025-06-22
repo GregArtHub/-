@@ -1,184 +1,120 @@
- document.addEventListener('DOMContentLoaded', function() {
-            const chatMessages = document.getElementById('chat-messages');
-            const messageInput = document.getElementById('message-input');
-            const sendButton = document.getElementById('send-button');
-            
-            let userName = '';
-            let numbersToCalculate = [];
-            let waitingForOperation = false;
-            
-            messageInput.addEventListener('input', function() {
-                if (messageInput.value.trim().length > 0) {
-                    sendButton.disabled = false;
-                    sendButton.classList.add('active');
-                } else {
-                    sendButton.disabled = true;
-                    sendButton.classList.remove('active');
-                }
-                
-             
-                this.style.height = 'auto';
-                this.style.height = (this.scrollHeight) + 'px';
-            });
-            
-            sendButton.addEventListener('click', sendMessage);
-            
-            messageInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey && messageInput.value.trim().length > 0) {
-                    e.preventDefault();
-                    sendMessage();
-                }
-            });
-            
-            function sendMessage() {
-                const messageText = messageInput.value.trim();
-                if (messageText.length === 0) return;
-                
-                addMessage(messageText, 'user');
-                messageInput.value = '';
-                sendButton.disabled = true;
-                sendButton.classList.remove('active');
-                messageInput.style.height = 'auto';
-                
-                
-                showTypingIndicator();
-                
-                
-                setTimeout(() => {
-                    removeTypingIndicator();
-                    processUserMessage(messageText);
-                }, 1000 + Math.random() * 1000);
-            }
-            
-            function addMessage(text, sender) {
-                const messageContainer = document.createElement('div');
-                messageContainer.classList.add('message-container', sender);
-                
-                const avatar = document.createElement('div');
-                avatar.classList.add('avatar', sender === 'user' ? 'user-avatar' : 'bot-avatar');
-                
-                const messageDiv = document.createElement('div');
-                messageDiv.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
-                messageDiv.textContent = text;
-                
-                if (sender === 'user') {
-                    messageContainer.appendChild(messageDiv);
-                    messageContainer.appendChild(avatar);
-                } else {
-                    messageContainer.appendChild(avatar);
-                    messageContainer.appendChild(messageDiv);
-                }
-                
-                chatMessages.insertBefore(messageContainer, chatMessages.firstChild);
-            }
-            
-            function showTypingIndicator() {
-                const messageContainer = document.createElement('div');
-                messageContainer.classList.add('message-container', 'bot');
-                
-                const avatar = document.createElement('div');
-                avatar.classList.add('avatar', 'bot-avatar');
-                
-                const typingDiv = document.createElement('div');
-                typingDiv.classList.add('message', 'bot-message', 'typing-indicator');
-                typingDiv.id = 'typing-indicator';
-                typingDiv.innerHTML = `
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
-                    <span class="typing-dot"></span>
-                `;
-                
-                messageContainer.appendChild(avatar);
-                messageContainer.appendChild(typingDiv);
-                chatMessages.insertBefore(messageContainer, chatMessages.firstChild);
-            }
-            
-            function removeTypingIndicator() {
-                const typingIndicator = document.getElementById('typing-indicator');
-                if (typingIndicator) {
-                    typingIndicator.parentElement.remove();
-                }
-            }
-            
-            function processUserMessage(message) {
-                if (waitingForOperation) {
-                    processOperation(message);
-                    return;
-                }
-                
-                if (message.startsWith('/')) {
-                    processCommand(message);
-                } else if (numbersToCalculate.length > 0) {
-                    addMessage('Пожалуйста, введите команду для вычисления (+, -, *, /)', 'bot');
-                    waitingForOperation = true;
-                } else {
-                    addMessage('Я не понимаю, введите другую команду!', 'bot');
-                }
-            }
-            
-            function processCommand(command) {
-                if (command === '/start') {
-                    userName = '';
-                    numbersToCalculate = [];
-                    waitingForOperation = false;
-                    addMessage('Привет, меня зовут Чат-бот, а как зовут тебя?', 'bot');
-                } else if (command.startsWith('/name:')) {
-                    userName = command.split(':')[1].trim();
-                    addMessage(`Привет ${userName}, приятно познакомится. Я умею считать, введи числа которые надо посчитать`, 'bot');
-                } else if (command.startsWith('/number:')) {
-                    const numbersStr = command.split(':')[1].trim();
-                    numbersToCalculate = numbersStr.split(',').map(num => parseFloat(num.trim()));
-                    
-                    if (numbersToCalculate.length === 2 && !isNaN(numbersToCalculate[0]) && !isNaN(numbersToCalculate[1])) {
-                        addMessage(`Хорошо, я запомнил числа ${numbersToCalculate[0]} и ${numbersToCalculate[1]}. Какое действие выполнить? (+, -, *, /)`, 'bot');
-                        waitingForOperation = true;
-                    } else {
-                        addMessage('Пожалуйста, введите два числа через запятую, например: /number: 5, 3', 'bot');
-                        numbersToCalculate = [];
-                    }
-                } else if (command === '/stop') {
-                    addMessage('Всего доброго, если хочешь поговорить пиши /start', 'bot');
-                    userName = '';
-                    numbersToCalculate = [];
-                    waitingForOperation = false;
-                } else {
-                    addMessage('Я не понимаю, введите другую команду!', 'bot');
-                }
-            }
-            
-            function processOperation(operation) {
-                operation = operation.trim();
-                if (['+', '-', '*', '/'].includes(operation)) {
-                    let result;
-                    const a = numbersToCalculate[0];
-                    const b = numbersToCalculate[1];
-                    
-                    switch (operation) {
-                        case '+':
-                            result = a + b;
-                            break;
-                        case '-':
-                            result = a - b;
-                            break;
-                        case '*':
-                            result = a * b;
-                            break;
-                        case '/':
-                            result = b !== 0 ? a / b : 'Ошибка: деление на ноль';
-                            break;
-                    }
-                    
-                    addMessage(`Результат: ${a} ${operation} ${b} = ${result}`, 'bot');
-                } else {
-                    addMessage('Пожалуйста, введите одну из операций: +, -, *, /', 'bot');
-                    return;
-                }
-                
-                numbersToCalculate = [];
-                waitingForOperation = false;
-            }
-            
-            setTimeout(() => {
-                addMessage('Введите команду /start, для начала общения', 'bot');
-            }, 500);
-        });
+const chatMessages = document.getElementById('chat-messages');
+const sendButton = document.getElementById('send-button');
+const messageInput = document.getElementById('message-input');
+let typingTimeout;
+
+function showTypingIndicator() {
+    let typingIndicator = document.getElementById('typing-indicator');
+    if (!typingIndicator) {
+        const container = document.createElement('div');
+        container.classList.add('message-container', 'bot');
+        container.id = 'typing-indicator';
+
+        const avatar = document.createElement('div');
+        avatar.classList.add('avatar', 'bot-avatar');
+
+        const typing = document.createElement('div');
+        typing.classList.add('message', 'bot-message', 'typing-indicator');
+        typing.innerHTML = `
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+        `;
+
+        container.appendChild(avatar);
+        container.appendChild(typing);
+        chatMessages.insertBefore(container, chatMessages.firstChild);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+}
+
+function removeTypingIndicator() {
+    const typing = document.getElementById('typing-indicator');
+    if (typing) {
+        chatMessages.removeChild(typing);
+    }
+}
+
+// Активируем кнопку, если есть текст
+messageInput.addEventListener('input', () => {
+    sendButton.disabled = !messageInput.value.trim();
+    sendButton.classList.toggle('active', messageInput.value.trim());
+
+    // Показываем анимацию троеточия при вводе текста
+    clearTimeout(typingTimeout);
+    showTypingIndicator();
+    typingTimeout = setTimeout(removeTypingIndicator, 1000); // Убираем анимацию через 1 секунду без активности
+});
+
+// Отправка сообщения при нажатии Enter
+messageInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
+// При нажатии на кнопку
+sendButton.addEventListener('click', sendMessage);
+
+function sendMessage() {
+    const text = messageInput.value.trim();
+    if (!text) return;
+
+    removeTypingIndicator(); // Убираем анимацию перед отправкой
+    addMessage(text, 'user');
+    messageInput.value = '';
+    sendButton.disabled = true;
+    sendButton.classList.remove('active');
+
+    // Симулируем "ответ бота" через 1 секунду
+    showTypingIndicator();
+    setTimeout(() => {
+        removeTypingIndicator();
+        const botReply = getBotResponse(text);
+        addMessage(botReply, 'bot');
+    }, 1000);
+}
+
+function addMessage(text, sender) {
+    const container = document.createElement('div');
+    container.classList.add('message-container', sender);
+
+    const avatar = document.createElement('div');
+    avatar.classList.add('avatar', sender === 'user' ? 'user-avatar' : 'bot-avatar');
+
+    const message = document.createElement('div');
+    message.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
+    message.textContent = text;
+
+    container.appendChild(sender === 'user' ? message : avatar);
+    container.appendChild(sender === 'user' ? avatar : message);
+
+    chatMessages.insertBefore(container, chatMessages.firstChild);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Логика ответа бота
+function getBotResponse(userMessage) {
+    const lower = userMessage.toLowerCase();
+    
+    if (lower === '/start') {
+        return 'Введите команду /start, для начала общения';
+    }
+    
+    if (lower.startsWith('/name:')) {
+        const name = userMessage.slice(6).trim();
+        return `Привет ${name}, приятно познакомиться. Я умею считать, введи числа которые надо посчитать`;
+    }
+    
+    if (lower.includes('и') && /\d/.test(lower)) {
+        const nums = lower.match(/\d+/g);
+        if (nums && nums.length >= 2) {
+            const num1 = parseInt(nums[0]);
+            const num2 = parseInt(nums[1]);
+            return `${num1} и ${num2}\nСумма: ${num1 + num2}`;
+        }
+    }
+    
+    return 'Я не понимаю, введите другую команду!';
+}
